@@ -1,3 +1,4 @@
+// app/screens/HomeScreen.tsx
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -14,8 +15,8 @@ import {
   returnCart,
   StatusResponse,
   User,
-} from '../service/api'; // ou ../services/api
-import { TOWERS } from '../../constants/towers';
+} from '../service/api';
+import { TOWERS, TowerId } from '../../constants/towers';
 
 type Props = {
   user: User;
@@ -27,13 +28,20 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [loadingAction, setLoadingAction] = useState(false);
 
-  const towerName =
-    TOWERS.find((t) => t.id === user.towerId)?.name ?? 'Minha torre';
+  const [currentTowerId, setCurrentTowerId] = useState<TowerId>('MAR');
+  const [showTowerSelect, setShowTowerSelect] = useState(false);
 
-  async function loadStatus() {
+  const currentTowerName =
+    TOWERS.find((t) => t.id === currentTowerId)?.name ?? 'Torre selecionada';
+
+  const myTowerName =
+    status?.myCart &&
+    TOWERS.find((t) => t.id === status.myCart!.towerId)?.name;
+
+  async function loadStatus(towerId = currentTowerId) {
     try {
       setLoadingStatus(true);
-      const data = await getStatus(user.apartment, user.towerId);
+      const data = await getStatus(user.apartment, towerId);
       setStatus(data);
     } catch (err) {
       console.error(err);
@@ -47,22 +55,35 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
     loadStatus();
   }, []);
 
-  async function handleUnlock() {
+  async function handleUnlockWithTower(towerId: TowerId) {
     try {
       setLoadingAction(true);
-      const updated = await unlockCart(user.apartment, user.towerId);
+      const updated = await unlockCart(user.apartment, towerId);
+      setCurrentTowerId(towerId);
       setStatus(updated);
-      if (updated.myCart) {
+
+      if (updated.myCart && updated.myCart.towerId === towerId) {
         Alert.alert(
           'Carrinho liberado',
-          `Você está com o carrinho #${updated.myCart.id} na ${towerName}.`
+          `Carrinho #${updated.myCart.id} liberado na ${TOWERS.find(
+            (t) => t.id === towerId
+          )?.name}.`
+        );
+      } else if (updated.myCart && updated.myCart.towerId !== towerId) {
+        Alert.alert(
+          'Aviso',
+          `Você já possui um carrinho em uso na ${TOWERS.find(
+            (t) => t.id === updated.myCart!.towerId
+          )?.name}.`
         );
       } else {
         Alert.alert(
           'Aviso',
-          'Nenhum carrinho foi destravado. Pode ser que não haja disponível na sua torre.'
+          'Nenhum carrinho disponível nessa torre no momento.'
         );
       }
+
+      setShowTowerSelect(false);
     } catch (err) {
       console.error(err);
       Alert.alert('Erro', 'Falha ao destravar carrinho.');
@@ -74,7 +95,7 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
   async function handleReturnCart() {
     try {
       setLoadingAction(true);
-      const updated = await returnCart(user.apartment, user.towerId);
+      const updated = await returnCart(user.apartment, currentTowerId);
       setStatus(updated);
       Alert.alert('Sucesso', 'Carrinho devolvido com sucesso.');
     } catch (err) {
@@ -89,26 +110,26 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.welcome}>
-        Olá, ap. {user.apartment} – {towerName}
-      </Text>
+      <Text style={styles.welcome}>Olá, ap. {user.apartment}</Text>
 
+      {/* Status da torre selecionada */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Status da sua torre</Text>
+        <Text style={styles.cardTitle}>Status da torre</Text>
+        <Text style={styles.infoText}>Torre selecionada: {currentTowerName}</Text>
 
         {loadingStatus ? (
           <ActivityIndicator size="small" />
         ) : (
           <>
             <Text style={styles.infoText}>
-              Carrinhos disponíveis na sua torre:{' '}
+              Carrinhos disponíveis:{' '}
               <Text style={styles.bold}>{status?.availableCarts ?? 0}</Text>
             </Text>
 
             {status?.availableCarts === 0 && (
               <View style={{ marginTop: 8 }}>
                 <Text style={styles.infoText}>
-                  Nenhum carrinho disponível na sua torre no momento.
+                  Nenhum carrinho disponível nesta torre.
                 </Text>
                 <Text style={[styles.infoText, { marginTop: 4 }]}>
                   Em uso pelos apartamentos:
@@ -124,17 +145,35 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
                 )}
               </View>
             )}
+
+            <PrimaryButton
+              label="Alterar torre exibida"
+              onPress={() => {
+                // alterna torre para navegar status
+                const idx = TOWERS.findIndex((t) => t.id === currentTowerId);
+                const next = TOWERS[(idx + 1) % TOWERS.length];
+                setCurrentTowerId(next.id);
+                loadStatus(next.id);
+              }}
+              style={{ marginTop: 8, backgroundColor: '#ccc' }}
+              textStyle={{ color: '#000' }}
+            />
           </>
         )}
       </View>
 
+      {/* Meu status */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Meu status</Text>
         {hasMyCart ? (
           <>
             <Text style={styles.infoText}>
-              Você está com o carrinho #<Text style={styles.bold}>{status?.myCart?.id}</Text>
+              Você está com o carrinho #
+              <Text style={styles.bold}>{status?.myCart?.id}</Text>
             </Text>
+            {myTowerName && (
+              <Text style={styles.infoText}>Torre: {myTowerName}</Text>
+            )}
             {status?.myCart?.since && (
               <Text style={styles.infoText}>Desde: {status.myCart.since}</Text>
             )}
@@ -151,6 +190,7 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
         )}
       </View>
 
+      {/* Resumo por torre */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Carrinhos por torre</Text>
         {loadingStatus ? (
@@ -158,25 +198,50 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
         ) : (
           status?.towersSummary.map((item) => (
             <Text key={item.towerId} style={styles.infoText}>
-              {item.name}: <Text style={styles.bold}>{item.availableCarts}</Text> livre(s)
+              {item.name}:{' '}
+              <Text style={styles.bold}>{item.availableCarts}</Text> livre(s)
             </Text>
           ))
         )}
       </View>
 
+      {/* Ações */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Ações</Text>
+
         <PrimaryButton
-          label={loadingAction ? 'Processando...' : 'Destravar carrinho'}
-          onPress={handleUnlock}
+          label="Destravar carrinho"
+          onPress={() => setShowTowerSelect(true)}
           disabled={loadingAction}
         />
+
+        {showTowerSelect && (
+          <View style={{ marginTop: 12 }}>
+            <Text style={styles.infoText}>Escolha a torre para destravar:</Text>
+            {TOWERS.map((tower) => (
+              <PrimaryButton
+                key={tower.id}
+                label={tower.name}
+                onPress={() => handleUnlockWithTower(tower.id)}
+                style={{ backgroundColor: '#444' }}
+              />
+            ))}
+            <PrimaryButton
+              label="Cancelar"
+              onPress={() => setShowTowerSelect(false)}
+              style={{ backgroundColor: '#ccc' }}
+              textStyle={{ color: '#000' }}
+            />
+          </View>
+        )}
+
         <PrimaryButton
           label="Atualizar status"
-          onPress={loadStatus}
+          onPress={() => loadStatus()}
           style={{ marginTop: 8, backgroundColor: '#ccc' }}
           textStyle={{ color: '#000' }}
         />
+
         <PrimaryButton
           label="Sair"
           onPress={onLogout}

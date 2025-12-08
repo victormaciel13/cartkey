@@ -1,4 +1,4 @@
-
+// app/index.tsx
 import React, { useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 import LoginScreen from './screens/LoginScreen';

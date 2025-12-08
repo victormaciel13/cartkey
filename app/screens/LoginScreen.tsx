@@ -1,8 +1,8 @@
+// app/screens/LoginScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import PrimaryButton from '../../components/PrimaryButton';
-import { login, User } from '../service/api'; // ou ../services/api
-import { TOWERS, TowerId } from '../../constants/towers';
+import { login, User } from '../service/api';
 
 type Props = {
   onLogin: (user: User) => void;
@@ -10,7 +10,6 @@ type Props = {
 
 const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   const [apartment, setApartment] = useState('');
-  const [selectedTower, setSelectedTower] = useState<TowerId>('MAR');
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
@@ -21,7 +20,7 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
 
     try {
       setLoading(true);
-      const user = await login(apartment.trim(), selectedTower);
+      const user = await login(apartment.trim());
       onLogin(user);
     } catch (err) {
       console.error(err);
@@ -34,40 +33,15 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>CartKey</Text>
-      <Text style={styles.subtitle}>Entre com seus dados</Text>
+      <Text style={styles.subtitle}>Digite o número do seu apartamento</Text>
 
-      <Text style={styles.label}>Apartamento</Text>
       <TextInput
         style={styles.input}
         placeholder="Ex: 101, 202, 15B"
         value={apartment}
         onChangeText={setApartment}
-        keyboardType="default"
         autoCapitalize="characters"
       />
-
-      <Text style={[styles.label, { marginTop: 16 }]}>Torre</Text>
-      <View style={styles.towersContainer}>
-        {TOWERS.map((tower) => {
-          const selected = tower.id === selectedTower;
-          return (
-            <TouchableOpacity
-              key={tower.id}
-              style={[styles.towerButton, selected && styles.towerButtonSelected]}
-              onPress={() => setSelectedTower(tower.id)}
-            >
-              <Text
-                style={[
-                  styles.towerButtonText,
-                  selected && styles.towerButtonTextSelected,
-                ]}
-              >
-                {tower.name}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
 
       <PrimaryButton
         label={loading ? 'Entrando...' : 'Entrar'}
@@ -96,11 +70,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#555',
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -108,34 +77,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  towersContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
     marginBottom: 16,
-  },
-  towerButton: {
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginRight: 8,
-    marginTop: 8,
-  },
-  towerButtonSelected: {
-    backgroundColor: '#0077b6',
-    borderColor: '#0077b6',
-  },
-  towerButtonText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  towerButtonTextSelected: {
-    color: '#fff',
-    fontWeight: '600',
+    backgroundColor: '#fff',
   },
 });
 

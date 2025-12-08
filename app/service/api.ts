@@ -1,7 +1,10 @@
-// app/services/api.ts  (ou app/service/api.ts se estiver assim)
+// app/service/api.ts
 import { TOWERS, TowerId } from '../../constants/towers';
 
-// MOCK em memória
+// ========================
+// TIPOS INTERNOS
+// ========================
+
 type CartStatus = 'LIVRE' | 'EM_USO';
 
 type Cart = {
@@ -32,6 +35,10 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// ========================
+// TIPOS EXPORTADOS
+// ========================
+
 export type TowersSummaryItem = {
   towerId: TowerId;
   name: string;
@@ -39,22 +46,33 @@ export type TowersSummaryItem = {
 };
 
 export type StatusResponse = {
-  availableCarts: number; // da torre do usuário
-  cartsInUse: { id: number; apartment: string | null }[]; // da torre do usuário
-  myCart: { id: number; since: string } | null;
-  towersSummary: TowersSummaryItem[]; // visão geral de todas as torres
+  // Status da torre consultada
+  availableCarts: number;
+  cartsInUse: { id: number; apartment: string | null }[];
+
+  // Carrinho do morador (em qualquer torre)
+  myCart: { id: number; towerId: TowerId; since: string } | null;
+
+  // Visão geral de todas as torres
+  towersSummary: TowersSummaryItem[];
 };
 
 export type User = {
   apartment: string;
-  towerId: TowerId;
 };
 
-export async function login(apartment: string, towerId: TowerId): Promise<User> {
-  // Aqui no futuro você valida com o backend (apto + torre)
+// ========================
+// LOGIN (APENAS APARTAMENTO)
+// ========================
+
+export async function login(apartment: string): Promise<User> {
   await delay(300);
-  return { apartment, towerId };
+  return { apartment };
 }
+
+// ========================
+// RESUMO DAS TORRES
+// ========================
 
 function buildTowersSummary(): TowersSummaryItem[] {
   return TOWERS.map((tower) => {
@@ -70,17 +88,25 @@ function buildTowersSummary(): TowersSummaryItem[] {
   });
 }
 
+// ========================
+// STATUS POR TORRE
+// ========================
+
 export async function getStatus(
   apartment: string,
   towerId: TowerId
 ): Promise<StatusResponse> {
-  await delay(300);
+  await delay(250);
 
   const cartsInTower = mockState.carts.filter((c) => c.towerId === towerId);
 
   const cartsInUse = cartsInTower.filter((c) => c.status === 'EM_USO');
-  const availableCarts = cartsInTower.filter((c) => c.status === 'LIVRE').length;
-  const myCart = cartsInTower.find(
+  const availableCarts = cartsInTower.filter(
+    (c) => c.status === 'LIVRE'
+  ).length;
+
+  // Carrinho do morador em QUALQUER torre
+  const myCartGlobal = mockState.carts.find(
     (c) => c.apartment === apartment && c.status === 'EM_USO'
   );
 
@@ -90,34 +116,37 @@ export async function getStatus(
       id: c.id,
       apartment: c.apartment,
     })),
-    myCart: myCart
+    myCart: myCartGlobal
       ? {
-          id: myCart.id,
-          since: myCart.since || 'há pouco',
+          id: myCartGlobal.id,
+          towerId: myCartGlobal.towerId,
+          since: myCartGlobal.since || 'há pouco',
         }
       : null,
     towersSummary: buildTowersSummary(),
   };
 }
 
+// ========================
+// DESTRAVAR CARRINHO
+// ========================
+
 export async function unlockCart(
   apartment: string,
   towerId: TowerId
 ): Promise<StatusResponse> {
-  await delay(400);
+  await delay(350);
 
-  // Se já estiver com carrinho na torre, só retorna status
+  // Se já estiver com carrinho em qualquer torre, não libera outro
   const already = mockState.carts.find(
-    (c) =>
-      c.apartment === apartment &&
-      c.status === 'EM_USO' &&
-      c.towerId === towerId
+    (c) => c.apartment === apartment && c.status === 'EM_USO'
   );
+
   if (already) {
     return getStatus(apartment, towerId);
   }
 
-  // Procura carrinho livre na torre do usuário
+  // Procura carrinho livre na torre escolhida
   const freeCart = mockState.carts.find(
     (c) => c.status === 'LIVRE' && c.towerId === towerId
   );
@@ -133,10 +162,14 @@ export async function unlockCart(
     minute: '2-digit',
   });
 
-  // Futuro: backend chama Arduino para torre/totem correspondente
+  // Futuro: aqui o backend chamará o ESP32 da torre correspondente
 
   return getStatus(apartment, towerId);
 }
+
+// ========================
+// DEVOLVER CARRINHO
+// ========================
 
 export async function returnCart(
   apartment: string,
@@ -144,11 +177,9 @@ export async function returnCart(
 ): Promise<StatusResponse> {
   await delay(300);
 
+  // Devolve carrinho em QUALQUER torre
   const myCart = mockState.carts.find(
-    (c) =>
-      c.apartment === apartment &&
-      c.status === 'EM_USO' &&
-      c.towerId === towerId
+    (c) => c.apartment === apartment && c.status === 'EM_USO'
   );
 
   if (myCart) {

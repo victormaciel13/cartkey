@@ -1,4 +1,4 @@
-// components/PrimaryButton.tsx
+
 import React from 'react';
 import {
   TouchableOpacity,
