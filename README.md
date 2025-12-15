@@ -30,6 +30,3 @@ O sistema se comunica com um **dispositivo físico (ESP32)** que aciona a trava 
 - ✅ Relé simulando a **trava física do carrinho**
 
 ---
-
-## 🧱 Arquitetura do Sistema
-
