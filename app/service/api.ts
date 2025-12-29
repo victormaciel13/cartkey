@@ -1,9 +1,19 @@
-// app/service/api.ts
 import { TOWERS, TowerId } from '../../constants/towers';
 
-// ========================
-// TIPOS INTERNOS
-// ========================
+
+async function sendBleCommand(
+  towerId: TowerId,
+  command: 'UNLOCK' | 'LOCK'
+): Promise<boolean> {
+  console.log(`[MOCK BLE] Torre=${towerId} Comando=${command}`);
+  // pequeno delay só para parecer "real"
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return true;
+}
+
+// ===============================
+//   LÓGICA DO CARTKEY
+// ===============================
 
 type CartStatus = 'LIVRE' | 'EM_USO';
 
@@ -35,10 +45,6 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// ========================
-// TIPOS EXPORTADOS
-// ========================
-
 export type TowersSummaryItem = {
   towerId: TowerId;
   name: string;
@@ -46,33 +52,21 @@ export type TowersSummaryItem = {
 };
 
 export type StatusResponse = {
-  // Status da torre consultada
-  availableCarts: number;
-  cartsInUse: { id: number; apartment: string | null }[];
-
-  // Carrinho do morador (em qualquer torre)
-  myCart: { id: number; towerId: TowerId; since: string } | null;
-
-  // Visão geral de todas as torres
-  towersSummary: TowersSummaryItem[];
+  availableCarts: number; // da torre consultada
+  cartsInUse: { id: number; apartment: string | null }[]; // da torre consultada
+  myCart: { id: number; towerId: TowerId; since: string } | null; // carrinho do morador (em qualquer torre)
+  towersSummary: TowersSummaryItem[]; // visão geral de todas as torres
 };
 
 export type User = {
   apartment: string;
 };
 
-// ========================
-// LOGIN (APENAS APARTAMENTO)
-// ========================
-
+// login APENAS com apartamento
 export async function login(apartment: string): Promise<User> {
   await delay(300);
   return { apartment };
 }
-
-// ========================
-// RESUMO DAS TORRES
-// ========================
 
 function buildTowersSummary(): TowersSummaryItem[] {
   return TOWERS.map((tower) => {
@@ -88,15 +82,11 @@ function buildTowersSummary(): TowersSummaryItem[] {
   });
 }
 
-// ========================
-// STATUS POR TORRE
-// ========================
-
 export async function getStatus(
   apartment: string,
   towerId: TowerId
 ): Promise<StatusResponse> {
-  await delay(250);
+  await delay(300);
 
   const cartsInTower = mockState.carts.filter((c) => c.towerId === towerId);
 
@@ -105,7 +95,7 @@ export async function getStatus(
     (c) => c.status === 'LIVRE'
   ).length;
 
-  // Carrinho do morador em QUALQUER torre
+  // carrinho do morador em QUALQUER torre
   const myCartGlobal = mockState.carts.find(
     (c) => c.apartment === apartment && c.status === 'EM_USO'
   );
@@ -127,21 +117,16 @@ export async function getStatus(
   };
 }
 
-// ========================
-// DESTRAVAR CARRINHO
-// ========================
-
 export async function unlockCart(
   apartment: string,
   towerId: TowerId
 ): Promise<StatusResponse> {
-  await delay(350);
+  await delay(400);
 
-  // Se já estiver com carrinho em qualquer torre, não libera outro
+  // Se já estiver com carrinho (em qualquer torre), só retorna status
   const already = mockState.carts.find(
     (c) => c.apartment === apartment && c.status === 'EM_USO'
   );
-
   if (already) {
     return getStatus(apartment, towerId);
   }
@@ -162,14 +147,11 @@ export async function unlockCart(
     minute: '2-digit',
   });
 
-  // Futuro: aqui o backend chamará o ESP32 da torre correspondente
+  // Aqui seria o BLE real – por enquanto só simula
+  await sendBleCommand(towerId, 'UNLOCK');
 
   return getStatus(apartment, towerId);
 }
-
-// ========================
-// DEVOLVER CARRINHO
-// ========================
 
 export async function returnCart(
   apartment: string,
@@ -177,15 +159,19 @@ export async function returnCart(
 ): Promise<StatusResponse> {
   await delay(300);
 
-  // Devolve carrinho em QUALQUER torre
+  // Procura carrinho do morador em QUALQUER torre
   const myCart = mockState.carts.find(
     (c) => c.apartment === apartment && c.status === 'EM_USO'
   );
 
   if (myCart) {
+    const myCartTower = myCart.towerId;
+
     myCart.status = 'LIVRE';
     myCart.apartment = null;
     myCart.since = null;
+
+    await sendBleCommand(myCartTower, 'LOCK');
   }
 
   return getStatus(apartment, towerId);
