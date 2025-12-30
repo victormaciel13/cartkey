@@ -1,6 +1,6 @@
 // app/screens/LoginScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import PrimaryButton from '../../components/PrimaryButton';
 import { login, User } from '../service/api';
 import AppLogo from '../../components/AppLogo';
@@ -12,6 +12,12 @@ type Props = {
 const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   const [apartment, setApartment] = useState('');
   const [loading, setLoading] = useState(false);
+
+  function handleChangeApartment(text: string) {
+    // 🔢 mantém apenas números: remove letras, espaços, símbolos etc.
+    const onlyNumbers = text.replace(/\D/g, '');
+    setApartment(onlyNumbers);
+  }
 
   async function handleLogin() {
     if (!apartment.trim()) {
@@ -32,25 +38,35 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <AppLogo></AppLogo>
-      <Text style={styles.title}>CartKey</Text>
-      <Text style={styles.subtitle}>Digite o número do seu apartamento</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.container}>
+        <AppLogo />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Ex: 101, 202, 15B"
-        value={apartment}
-        onChangeText={setApartment}
-        autoCapitalize="characters"
-      />
+        <Text style={styles.title}>CartKey</Text>
+        <Text style={styles.subtitle}>Digite o número do seu apartamento</Text>
 
-      <PrimaryButton
-        label={loading ? 'Entrando...' : 'Entrar'}
-        onPress={handleLogin}
-        disabled={loading}
-      />
-    </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: 101, 202, 1503"
+          placeholderTextColor="#999"
+          value={apartment}
+          onChangeText={handleChangeApartment}
+          keyboardType="number-pad"   // 🔢 teclado só de números
+          maxLength={5}               // ajuste se precisar de mais dígitos
+          returnKeyType="done"
+          onSubmitEditing={handleLogin}
+        />
+
+        <PrimaryButton
+          label={loading ? 'Entrando...' : 'Entrar'}
+          onPress={handleLogin}
+          disabled={loading || !apartment.trim()}
+        />
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -59,12 +75,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: 'center',
+    backgroundColor: '#f4f4f4',
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 8,
     textAlign: 'center',
+    color: '#000',
   },
   subtitle: {
     fontSize: 16,
