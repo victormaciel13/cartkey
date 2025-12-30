@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import PrimaryButton from '../../components/PrimaryButton';
 import { login, User } from '../service/api';
+import AppLogo from '../../components/AppLogo';
 
 type Props = {
   onLogin: (user: User) => void;
@@ -32,6 +33,7 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
 
   return (
     <View style={styles.container}>
+      <AppLogo></AppLogo>
       <Text style={styles.title}>CartKey</Text>
       <Text style={styles.subtitle}>Digite o número do seu apartamento</Text>
 
