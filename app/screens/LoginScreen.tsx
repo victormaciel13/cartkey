@@ -51,7 +51,7 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
         <TextInput
           style={styles.input}
           placeholder="Ex: 101, 202, 1503"
-          placeholderTextColor="#999"
+          placeholderTextColor="#7a98b8"
           value={apartment}
           onChangeText={handleChangeApartment}
           keyboardType="number-pad"   // 🔢 teclado só de números
@@ -65,6 +65,13 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
           onPress={handleLogin}
           disabled={loading || !apartment.trim()}
         />
+
+        {/* Dica de acesso gerencial */}
+        <View style={styles.hintBox}>
+          <Text style={styles.hintTitle}>Acesso Gerencial</Text>
+          <Text style={styles.hintRow}>🔑 Admin: ap. <Text style={styles.hintCode}>000</Text></Text>
+          <Text style={styles.hintRow}>🛎 Portaria: ap. <Text style={styles.hintCode}>999</Text></Text>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -75,30 +82,59 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: 'center',
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#001a33',
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 8,
     textAlign: 'center',
-    color: '#000',
+    color: '#e8f0f7',
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 24,
     textAlign: 'center',
-    color: '#555',
+    color: '#7a98b8',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
+    borderColor: 'rgba(0,119,182,0.4)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+    fontSize: 18,
     marginBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#002a50',
+    color: '#e8f0f7',
+    textAlign: 'center',
+    letterSpacing: 4,
+  },
+  hintBox: {
+    marginTop: 32,
+    backgroundColor: '#002a50',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(0,119,182,0.3)',
+    alignItems: 'center',
+    gap: 4,
+  },
+  hintTitle: {
+    color: '#7a98b8',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  hintRow: {
+    color: '#7a98b8',
+    fontSize: 13,
+  },
+  hintCode: {
+    color: '#00f5d4',
+    fontWeight: '800',
   },
 });
 
