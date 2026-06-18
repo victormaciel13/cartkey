@@ -1,22 +1,23 @@
 // app/screens/LoginScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View, Text, TextInput, StyleSheet, Alert,
+  KeyboardAvoidingView, Platform, StatusBar,
+} from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PrimaryButton from '../../components/PrimaryButton';
 import { login, User } from '../service/api';
 import AppLogo from '../../components/AppLogo';
+import { Palette, Radius, Spacing, FontSize, FontWeight } from '../../constants/theme';
 
-type Props = {
-  onLogin: (user: User) => void;
-};
+type Props = { onLogin: (user: User) => void };
 
 const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   const [apartment, setApartment] = useState('');
   const [loading, setLoading] = useState(false);
 
   function handleChangeApartment(text: string) {
-    // 🔢 mantém apenas números: remove letras, espaços, símbolos etc.
-    const onlyNumbers = text.replace(/\D/g, '');
-    setApartment(onlyNumbers);
+    setApartment(text.replace(/\D/g, '')); // só números
   }
 
   async function handleLogin() {
@@ -24,7 +25,6 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
       Alert.alert('Atenção', 'Informe o número do apartamento.');
       return;
     }
-
     try {
       setLoading(true);
       const user = await login(apartment.trim());
@@ -38,27 +38,31 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <StatusBar barStyle="light-content" backgroundColor={Palette.bg} />
       <View style={styles.container}>
         <AppLogo />
 
-        <Text style={styles.title}>CartKey</Text>
-        <Text style={styles.subtitle}>Digite o número do seu apartamento</Text>
+        <Text style={styles.title}>
+          Cart<Text style={styles.titleAccent}>Key</Text>
+        </Text>
+        <Text style={styles.subtitle}>Digite o número do seu apartamento para entrar</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Ex: 101, 202, 1503"
-          placeholderTextColor="#7a98b8"
-          value={apartment}
-          onChangeText={handleChangeApartment}
-          keyboardType="number-pad"   // 🔢 teclado só de números
-          maxLength={5}               // ajuste se precisar de mais dígitos
-          returnKeyType="done"
-          onSubmitEditing={handleLogin}
-        />
+        <View style={styles.inputWrap}>
+          <MaterialCommunityIcons name="home-variant" size={22} color={Palette.textMuted} />
+          <TextInput
+            style={styles.input}
+            placeholder="Ex: 101"
+            placeholderTextColor={Palette.textFaint}
+            value={apartment}
+            onChangeText={handleChangeApartment}
+            keyboardType="number-pad"
+            maxLength={5}
+            returnKeyType="done"
+            onSubmitEditing={handleLogin}
+            accessibilityLabel="Número do apartamento"
+          />
+        </View>
 
         <PrimaryButton
           label={loading ? 'Entrando...' : 'Entrar'}
@@ -66,11 +70,20 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
           disabled={loading || !apartment.trim()}
         />
 
-        {/* Dica de acesso gerencial */}
         <View style={styles.hintBox}>
-          <Text style={styles.hintTitle}>Acesso Gerencial</Text>
-          <Text style={styles.hintRow}>🔑 Admin: ap. <Text style={styles.hintCode}>000</Text></Text>
-          <Text style={styles.hintRow}>🛎 Portaria: ap. <Text style={styles.hintCode}>999</Text></Text>
+          <Text style={styles.hintTitle}>Acesso gerencial</Text>
+          <View style={styles.hintRow}>
+            <MaterialCommunityIcons name="shield-account" size={18} color={Palette.primary} />
+            <Text style={styles.hintText}>
+              Admin: ap. <Text style={styles.hintCode}>000</Text>
+            </Text>
+          </View>
+          <View style={styles.hintRow}>
+            <MaterialCommunityIcons name="bell-ring" size={18} color={Palette.info} />
+            <Text style={styles.hintText}>
+              Portaria: ap. <Text style={styles.hintCode}>999</Text>
+            </Text>
+          </View>
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -80,62 +93,67 @@ const LoginScreen: React.FC<Props> = ({ onLogin }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    padding: Spacing.xl,
     justifyContent: 'center',
-    backgroundColor: '#001a33',
+    backgroundColor: Palette.bg,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 8,
+    fontSize: FontSize.xxl,
+    fontWeight: FontWeight.heavy,
+    marginBottom: Spacing.xs,
     textAlign: 'center',
-    color: '#e8f0f7',
+    color: Palette.text,
+    letterSpacing: -0.5,
   },
+  titleAccent: { color: Palette.primary },
   subtitle: {
-    fontSize: 16,
-    marginBottom: 24,
+    fontSize: FontSize.md,
+    marginBottom: Spacing.xl,
     textAlign: 'center',
-    color: '#7a98b8',
+    color: Palette.textMuted,
+    lineHeight: 24,
+  },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderWidth: 1.5,
+    borderColor: Palette.primaryBorder,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: Palette.surface,
+    marginBottom: Spacing.md,
   },
   input: {
-    borderWidth: 1,
-    borderColor: 'rgba(0,119,182,0.4)',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-    fontSize: 18,
-    marginBottom: 16,
-    backgroundColor: '#002a50',
-    color: '#e8f0f7',
+    flex: 1,
+    paddingVertical: 15,
+    fontSize: FontSize.xl,
+    color: Palette.text,
     textAlign: 'center',
     letterSpacing: 4,
+    fontWeight: FontWeight.bold,
   },
   hintBox: {
-    marginTop: 32,
-    backgroundColor: '#002a50',
-    borderRadius: 12,
-    padding: 14,
+    marginTop: Spacing.xxl,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(0,119,182,0.3)',
-    alignItems: 'center',
-    gap: 4,
+    borderColor: Palette.border,
+    gap: Spacing.sm,
   },
   hintTitle: {
-    color: '#7a98b8',
-    fontSize: 11,
-    fontWeight: '700',
+    color: Palette.textMuted,
+    fontSize: FontSize.xs,
+    fontWeight: FontWeight.bold,
     letterSpacing: 1,
     textTransform: 'uppercase',
-    marginBottom: 6,
+    marginBottom: Spacing.xs,
+    textAlign: 'center',
   },
-  hintRow: {
-    color: '#7a98b8',
-    fontSize: 13,
-  },
-  hintCode: {
-    color: '#00f5d4',
-    fontWeight: '800',
-  },
+  hintRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, justifyContent: 'center' },
+  hintText: { color: Palette.textMuted, fontSize: FontSize.sm },
+  hintCode: { color: Palette.primary, fontWeight: FontWeight.heavy, fontSize: FontSize.md },
 });
 
 export default LoginScreen;

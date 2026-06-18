@@ -1,55 +1,18 @@
 // app/screens/HomeScreen.tsx
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
+  View, Text, StyleSheet, Alert, ActivityIndicator,
+  ScrollView, TouchableOpacity, StatusBar,
 } from 'react-native';
-import {
-  getStatus,
-  unlockCart,
-  returnCart,
-  StatusResponse,
-  User,
-} from '../service/api';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { getStatus, unlockCart, returnCart, StatusResponse, User } from '../service/api';
 import { TOWERS, TowerId } from '../../constants/towers';
+import {
+  Palette, Radius, Spacing, FontSize, FontWeight, A11y, Shadow,
+} from '../../constants/theme';
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
-const C = {
-  bg: '#0A1628',
-  card: '#0D1F3C',
-  cardBorder: 'rgba(255,255,255,0.08)',
-  teal: '#00C9A7',
-  tealBg: 'rgba(0,201,167,0.12)',
-  tealBorder: 'rgba(0,201,167,0.25)',
-  blue: '#38BDF8',
-  blueBg: 'rgba(56,189,248,0.08)',
-  blueBorder: 'rgba(56,189,248,0.2)',
-  orange: '#F59E0B',
-  orangeBg: 'rgba(245,158,11,0.12)',
-  orangeBorder: 'rgba(245,158,11,0.3)',
-  red: '#EF4444',
-  redBg: 'rgba(239,68,68,0.12)',
-  redBorder: 'rgba(239,68,68,0.3)',
-  green: '#22C55E',
-  white: '#FFFFFF',
-  muted: '#64748B',
-  lightBlue: '#93C5FD',
-  slate: '#CBD5E1',
-};
+type Props = { user: User; onLogout: () => void };
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-type Props = {
-  user: User;
-  onLogout: () => void;
-};
-
-// ─── Component ───────────────────────────────────────────────────────────────
 const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(true);
@@ -57,13 +20,8 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
   const [currentTowerId, setCurrentTowerId] = useState<TowerId>('MAR');
   const [showTowerSelect, setShowTowerSelect] = useState(false);
 
-  const currentTowerName =
-    TOWERS.find((t) => t.id === currentTowerId)?.name ?? 'Torre selecionada';
-
-  const myTowerName =
-    status?.myCart &&
-    TOWERS.find((t) => t.id === status.myCart!.towerId)?.name;
-
+  const currentTowerName = TOWERS.find((t) => t.id === currentTowerId)?.name ?? 'Torre selecionada';
+  const myTowerName = status?.myCart && TOWERS.find((t) => t.id === status.myCart!.towerId)?.name;
   const hasMyCart = !!status?.myCart;
   const availableCarts = status?.availableCarts ?? 0;
 
@@ -80,9 +38,7 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
     }
   }
 
-  useEffect(() => {
-    loadStatus();
-  }, []);
+  useEffect(() => { loadStatus(); }, []);
 
   function handleCycleTower() {
     const idx = TOWERS.findIndex((t) => t.id === currentTowerId);
@@ -98,15 +54,9 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
       setCurrentTowerId(towerId);
       setStatus(updated);
       if (updated.myCart && updated.myCart.towerId === towerId) {
-        Alert.alert(
-          'Carrinho liberado! 🛒',
-          `Carrinho #${updated.myCart.id} liberado na ${TOWERS.find((t) => t.id === towerId)?.name}.`
-        );
+        Alert.alert('Carrinho liberado! 🛒', `Carrinho #${updated.myCart.id} liberado na ${TOWERS.find((t) => t.id === towerId)?.name}.`);
       } else if (updated.myCart && updated.myCart.towerId !== towerId) {
-        Alert.alert(
-          'Aviso',
-          `Você já possui um carrinho em uso na ${TOWERS.find((t) => t.id === updated.myCart!.towerId)?.name}.`
-        );
+        Alert.alert('Aviso', `Você já possui um carrinho em uso na ${TOWERS.find((t) => t.id === updated.myCart!.towerId)?.name}.`);
       } else {
         Alert.alert('Sem carrinhos', 'Nenhum carrinho disponível nessa torre no momento.');
       }
@@ -135,67 +85,68 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
-      <ScrollView
-        style={styles.screen}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <StatusBar barStyle="light-content" backgroundColor={Palette.bgElevated} />
+      <ScrollView style={styles.screen} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-        {/* ── Header ─────────────────────────────────────────────── */}
+        {/* ── Header ── */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.headerGreeting}>Bem-vindo de volta</Text>
-            <Text style={styles.headerApt}>
-              Ap. <Text style={styles.headerAptAccent}>{user.apartment}</Text>
-            </Text>
+          <View style={styles.headerLeft}>
+            <View style={styles.brandDot}>
+              <MaterialCommunityIcons name="cart-outline" size={22} color={Palette.primary} />
+            </View>
+            <View>
+              <Text style={styles.headerGreeting}>Bem-vindo de volta</Text>
+              <Text style={styles.headerApt}>
+                Apartamento <Text style={styles.headerAptAccent}>{user.apartment}</Text>
+              </Text>
+            </View>
           </View>
-          <TouchableOpacity style={styles.logoutBtn} onPress={onLogout} activeOpacity={0.7}>
-            <Text style={styles.logoutIcon}>⎋</Text>
+          <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={onLogout}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Sair"
+          >
+            <MaterialCommunityIcons name="logout" size={22} color={Palette.danger} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.content}>
 
-          {/* ── Torre selecionada ───────────────────────────────────── */}
+          {/* ── Torre selecionada ── */}
           <View style={styles.torreCard}>
             <Text style={styles.sectionLabel}>Torre selecionada</Text>
             <Text style={styles.torreName}>{currentTowerName}</Text>
 
             {loadingStatus ? (
-              <ActivityIndicator color={C.teal} style={{ marginVertical: 12 }} />
+              <ActivityIndicator color={Palette.primary} style={{ marginVertical: 14 }} />
             ) : (
               <View style={styles.torreCountRow}>
-                <Text style={[styles.torreCount, availableCarts === 0 && styles.torreCountZero]}>
-                  {availableCarts}
-                </Text>
-                <Text style={styles.torreCountLabel}>
-                  carrinhos{'\n'}disponíveis
-                </Text>
+                <Text style={[styles.torreCount, availableCarts === 0 && styles.torreCountZero]}>{availableCarts}</Text>
+                <Text style={styles.torreCountLabel}>carrinhos{'\n'}disponíveis</Text>
               </View>
             )}
 
-            {/* Carrinhos em uso quando torre está cheia */}
             {!loadingStatus && availableCarts === 0 && status?.cartsInUse?.length ? (
               <View style={styles.inUseBox}>
                 <Text style={styles.inUseTitle}>Em uso por:</Text>
                 {status.cartsInUse.map((cart) => (
-                  <Text key={cart.id} style={styles.inUseItem}>
-                    • Carrinho #{cart.id} – Ap. {cart.apartment}
-                  </Text>
+                  <Text key={cart.id} style={styles.inUseItem}>• Carrinho #{cart.id} – Ap. {cart.apartment}</Text>
                 ))}
               </View>
             ) : null}
 
-            <TouchableOpacity style={styles.alterarBtn} onPress={handleCycleTower} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.alterarBtn} onPress={handleCycleTower} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Alterar torre exibida">
+              <MaterialCommunityIcons name="swap-horizontal" size={18} color={Palette.primary} />
               <Text style={styles.alterarBtnText}>Alterar torre exibida</Text>
             </TouchableOpacity>
           </View>
 
-          {/* ── Meu status ─────────────────────────────────────────── */}
+          {/* ── Meu status ── */}
           <View style={[styles.statusCard, hasMyCart && styles.statusCardActive]}>
             <View style={[styles.statusIconWrap, hasMyCart && styles.statusIconWrapActive]}>
-              <Text style={[styles.statusIconEmoji, hasMyCart && { color: C.teal }]}>🛒</Text>
+              <MaterialCommunityIcons name="cart" size={26} color={hasMyCart ? Palette.primary : Palette.textMuted} />
             </View>
             <View style={styles.statusText}>
               <Text style={styles.statusLabel}>Meu status</Text>
@@ -205,9 +156,7 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
                     Carrinho <Text style={styles.statusValBold}>#{status?.myCart?.id}</Text>
                     {myTowerName ? ` · ${myTowerName}` : ''}
                   </Text>
-                  {status?.myCart?.since && (
-                    <Text style={styles.statusSince}>Desde {status.myCart.since}</Text>
-                  )}
+                  {status?.myCart?.since && <Text style={styles.statusSince}>Desde {status.myCart.since}</Text>}
                 </>
               ) : (
                 <Text style={styles.statusVal}>Nenhum carrinho em uso</Text>
@@ -220,7 +169,7 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
             )}
           </View>
 
-          {/* ── Carrinhos por torre ─────────────────────────────────── */}
+          {/* ── Carrinhos por torre ── */}
           <View>
             <Text style={styles.sectionLabel}>Carrinhos por torre</Text>
             <View style={styles.torresGrid}>
@@ -228,24 +177,20 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
                 ? TOWERS.map((t) => (
                     <View key={t.id} style={styles.torreMini}>
                       <Text style={styles.torreMiniName}>{t.name.replace('Torre ', '')}</Text>
-                      <ActivityIndicator color={C.teal} size="small" />
+                      <ActivityIndicator color={Palette.primary} size="small" />
                     </View>
                   ))
                 : (status?.towersSummary ?? TOWERS.map((t) => ({ towerId: t.id, name: t.name, availableCarts: 0 }))).map((item) => (
                     <View key={item.towerId} style={styles.torreMini}>
-                      <Text style={styles.torreMiniName}>
-                        {item.name.replace('Torre ', '')}
-                      </Text>
-                      <Text style={[styles.torreMiniCount, item.availableCarts === 0 && styles.torreMiniCountZero]}>
-                        {item.availableCarts}
-                      </Text>
+                      <Text style={styles.torreMiniName}>{item.name.replace('Torre ', '')}</Text>
+                      <Text style={[styles.torreMiniCount, item.availableCarts === 0 && styles.torreMiniCountZero]}>{item.availableCarts}</Text>
                       <Text style={styles.torreMiniSub}>livre(s)</Text>
                     </View>
                   ))}
             </View>
           </View>
 
-          {/* ── Ações ──────────────────────────────────────────────── */}
+          {/* ── Ações ── */}
           <View>
             <Text style={styles.sectionLabel}>Ações</Text>
 
@@ -253,12 +198,13 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
               <TouchableOpacity
                 style={[styles.btnAction, styles.btnDestravar, loadingAction && styles.btnDisabled]}
                 onPress={() => setShowTowerSelect(true)}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
                 disabled={loadingAction}
+                accessibilityRole="button"
+                accessibilityLabel="Destravar carrinho"
               >
-                <Text style={styles.btnDestravLabel}>
-                  {loadingAction ? 'Aguarde...' : '🔓  Destravar carrinho'}
-                </Text>
+                <MaterialCommunityIcons name="lock-open-variant" size={22} color={Palette.onPrimary} />
+                <Text style={styles.btnDestravLabel}>{loadingAction ? 'Aguarde...' : 'Destravar carrinho'}</Text>
               </TouchableOpacity>
             ) : (
               <View style={styles.towerSelectBox}>
@@ -268,46 +214,36 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
                     key={tower.id}
                     style={[styles.btnAction, styles.btnTorre, loadingAction && styles.btnDisabled]}
                     onPress={() => handleUnlockWithTower(tower.id)}
-                    activeOpacity={0.8}
+                    activeOpacity={0.85}
                     disabled={loadingAction}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Destravar na ${tower.name}`}
                   >
+                    <MaterialCommunityIcons name="office-building-marker" size={20} color={Palette.primary} />
                     <Text style={styles.btnTorreLabel}>{tower.name}</Text>
                   </TouchableOpacity>
                 ))}
-                <TouchableOpacity
-                  style={[styles.btnAction, styles.btnCancelar]}
-                  onPress={() => setShowTowerSelect(false)}
-                  activeOpacity={0.8}
-                >
+                <TouchableOpacity style={[styles.btnAction, styles.btnCancelar]} onPress={() => setShowTowerSelect(false)} activeOpacity={0.85} accessibilityRole="button" accessibilityLabel="Cancelar">
                   <Text style={styles.btnCancelarLabel}>Cancelar</Text>
                 </TouchableOpacity>
               </View>
             )}
 
             <TouchableOpacity
-              style={[
-                styles.btnAction,
-                hasMyCart ? styles.btnDevolver : styles.btnDevolverDisabled,
-                (loadingAction || !hasMyCart) && styles.btnDisabled,
-              ]}
+              style={[styles.btnAction, hasMyCart ? styles.btnDevolver : styles.btnDevolverDisabled, (loadingAction || !hasMyCart) && styles.btnDisabled]}
               onPress={handleReturnCart}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
               disabled={loadingAction || !hasMyCart}
+              accessibilityRole="button"
+              accessibilityLabel="Devolver carrinho"
             >
-              <Text style={[styles.btnDevolverLabel, !hasMyCart && { color: C.muted }]}>
-                🔄  Devolver carrinho
-              </Text>
+              <MaterialCommunityIcons name="cart-arrow-down" size={22} color={hasMyCart ? Palette.warning : Palette.textMuted} />
+              <Text style={[styles.btnDevolverLabel, !hasMyCart && { color: Palette.textMuted }]}>Devolver carrinho</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.btnAction, styles.btnAtualizar]}
-              onPress={() => loadStatus()}
-              activeOpacity={0.8}
-              disabled={loadingStatus}
-            >
-              <Text style={styles.btnAtualizarLabel}>
-                {loadingStatus ? 'Atualizando...' : '↻  Atualizar status'}
-              </Text>
+            <TouchableOpacity style={[styles.btnAction, styles.btnAtualizar]} onPress={() => loadStatus()} activeOpacity={0.85} disabled={loadingStatus} accessibilityRole="button" accessibilityLabel="Atualizar status">
+              <MaterialCommunityIcons name="refresh" size={20} color={Palette.info} />
+              <Text style={styles.btnAtualizarLabel}>{loadingStatus ? 'Atualizando...' : 'Atualizar status'}</Text>
             </TouchableOpacity>
           </View>
 
@@ -317,317 +253,113 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
   );
 };
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: C.bg,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
+  screen: { flex: 1, backgroundColor: Palette.bg },
+  scrollContent: { paddingBottom: 40 },
+
   header: {
-    backgroundColor: C.card,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 0.5,
-    borderBottomColor: C.cardBorder,
+    backgroundColor: Palette.bgElevated,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: Palette.border,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerGreeting: {
-    fontSize: 12,
-    color: C.muted,
-    letterSpacing: 0.3,
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flex: 1 },
+  brandDot: {
+    width: 44, height: 44, borderRadius: Radius.md,
+    backgroundColor: Palette.primarySoft,
+    borderWidth: 1, borderColor: Palette.primaryBorder,
+    alignItems: 'center', justifyContent: 'center',
   },
-  headerApt: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: C.white,
-    marginTop: 2,
-  },
-  headerAptAccent: {
-    color: C.teal,
-  },
+  headerGreeting: { fontSize: FontSize.sm, color: Palette.textMuted },
+  headerApt: { fontSize: FontSize.xl, fontWeight: FontWeight.heavy, color: Palette.white, marginTop: 2 },
+  headerAptAccent: { color: Palette.primary },
   logoutBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: C.redBg,
-    borderWidth: 0.5,
-    borderColor: C.redBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: A11y.minHit, height: A11y.minHit, borderRadius: Radius.md,
+    backgroundColor: Palette.dangerSoft, borderWidth: 1, borderColor: Palette.dangerBorder,
+    alignItems: 'center', justifyContent: 'center',
   },
-  logoutIcon: {
-    fontSize: 18,
-    color: C.red,
-  },
-  content: {
-    padding: 16,
-    gap: 14,
-  },
+
+  content: { padding: Spacing.lg, gap: Spacing.lg },
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1.2,
-    color: C.muted,
+    fontSize: FontSize.xs,
+    fontWeight: FontWeight.bold,
+    letterSpacing: 0.6,
+    color: Palette.textMuted,
     textTransform: 'uppercase',
-    marginBottom: 10,
+    marginBottom: Spacing.sm,
   },
+
   torreCard: {
-    backgroundColor: C.card,
-    borderRadius: 16,
-    padding: 18,
-    borderWidth: 0.5,
-    borderColor: C.tealBorder,
+    backgroundColor: Palette.surface, borderRadius: Radius.lg, padding: Spacing.xl,
+    borderWidth: 1, borderColor: Palette.primaryBorder, ...Shadow,
   },
-  torreName: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: C.white,
-    marginBottom: 10,
-  },
-  torreCountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 14,
-  },
-  torreCount: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: C.teal,
-    lineHeight: 52,
-  },
-  torreCountZero: {
-    color: C.red,
-  },
-  torreCountLabel: {
-    fontSize: 13,
-    color: C.lightBlue,
-    lineHeight: 18,
-  },
-  inUseBox: {
-    backgroundColor: 'rgba(239,68,68,0.08)',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 12,
-    borderWidth: 0.5,
-    borderColor: C.redBorder,
-  },
-  inUseTitle: {
-    fontSize: 12,
-    color: C.red,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  inUseItem: {
-    fontSize: 13,
-    color: '#FDA4AF',
-    marginLeft: 4,
-    marginTop: 2,
-  },
+  torreName: { fontSize: FontSize.xl, fontWeight: FontWeight.heavy, color: Palette.white, marginBottom: Spacing.sm },
+  torreCountRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.lg },
+  torreCount: { fontSize: FontSize.display, fontWeight: FontWeight.heavy, color: Palette.primary, lineHeight: 48 },
+  torreCountZero: { color: Palette.danger },
+  torreCountLabel: { fontSize: FontSize.md, color: Palette.textMuted, lineHeight: 22 },
+
+  inUseBox: { backgroundColor: Palette.dangerSoft, borderRadius: Radius.sm, padding: Spacing.md, marginBottom: Spacing.md, borderWidth: 1, borderColor: Palette.dangerBorder },
+  inUseTitle: { fontSize: FontSize.sm, color: Palette.danger, fontWeight: FontWeight.bold, marginBottom: Spacing.xs },
+  inUseItem: { fontSize: FontSize.sm, color: '#FCA5A5', marginLeft: 4, marginTop: 2 },
+
   alterarBtn: {
-    backgroundColor: C.tealBg,
-    borderRadius: 10,
-    borderWidth: 0.5,
-    borderColor: C.tealBorder,
-    paddingVertical: 11,
-    alignItems: 'center',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.xs,
+    backgroundColor: Palette.primarySoft, borderRadius: Radius.sm, borderWidth: 1, borderColor: Palette.primaryBorder,
+    minHeight: A11y.minHit, paddingVertical: 12,
   },
-  alterarBtnText: {
-    color: C.teal,
-    fontSize: 13,
-    fontWeight: '600',
-  },
+  alterarBtnText: { color: Palette.primary, fontSize: FontSize.md, fontWeight: FontWeight.bold },
+
   statusCard: {
-    backgroundColor: C.card,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 0.5,
-    borderColor: C.cardBorder,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
+    backgroundColor: Palette.surface, borderRadius: Radius.lg, padding: Spacing.lg,
+    borderWidth: 1, borderColor: Palette.border, flexDirection: 'row', alignItems: 'center', gap: Spacing.md, ...Shadow,
   },
-  statusCardActive: {
-    borderColor: C.tealBorder,
-  },
+  statusCardActive: { borderColor: Palette.primaryBorder },
   statusIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: 'rgba(100,116,139,0.15)',
-    borderWidth: 0.5,
-    borderColor: 'rgba(100,116,139,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
+    width: 52, height: 52, borderRadius: Radius.md,
+    backgroundColor: 'rgba(148,163,184,0.12)', borderWidth: 1, borderColor: Palette.border,
+    alignItems: 'center', justifyContent: 'center',
   },
-  statusIconWrapActive: {
-    backgroundColor: C.tealBg,
-    borderColor: C.tealBorder,
-  },
-  statusIconEmoji: {
-    fontSize: 20,
-    color: C.muted,
-  },
-  statusText: {
-    flex: 1,
-  },
-  statusLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.8,
-    color: C.muted,
-    textTransform: 'uppercase',
-    marginBottom: 3,
-  },
-  statusVal: {
-    fontSize: 14,
-    color: C.slate,
-  },
-  statusValBold: {
-    fontWeight: '700',
-    color: C.white,
-  },
-  statusSince: {
-    fontSize: 12,
-    color: C.muted,
-    marginTop: 2,
-  },
-  statusBadge: {
-    backgroundColor: C.tealBg,
-    borderRadius: 99,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderWidth: 0.5,
-    borderColor: C.tealBorder,
-  },
-  statusBadgeText: {
-    fontSize: 11,
-    color: C.teal,
-    fontWeight: '600',
-  },
-  torresGrid: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  torreMini: {
-    flex: 1,
-    backgroundColor: C.card,
-    borderRadius: 12,
-    borderWidth: 0.5,
-    borderColor: C.cardBorder,
-    padding: 12,
-    alignItems: 'center',
-  },
-  torreMiniName: {
-    fontSize: 11,
-    color: C.muted,
-    marginBottom: 4,
-  },
-  torreMiniCount: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: C.teal,
-    lineHeight: 30,
-    marginBottom: 2,
-  },
-  torreMiniCountZero: {
-    color: C.red,
-  },
-  torreMiniSub: {
-    fontSize: 10,
-    color: 'rgba(100,116,139,0.7)',
-  },
+  statusIconWrapActive: { backgroundColor: Palette.primarySoft, borderColor: Palette.primaryBorder },
+  statusText: { flex: 1 },
+  statusLabel: { fontSize: FontSize.xs, fontWeight: FontWeight.bold, letterSpacing: 0.6, color: Palette.textMuted, textTransform: 'uppercase', marginBottom: 3 },
+  statusVal: { fontSize: FontSize.md, color: Palette.text },
+  statusValBold: { fontWeight: FontWeight.heavy, color: Palette.white },
+  statusSince: { fontSize: FontSize.sm, color: Palette.textMuted, marginTop: 2 },
+  statusBadge: { backgroundColor: Palette.primarySoft, borderRadius: Radius.pill, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: Palette.primaryBorder },
+  statusBadgeText: { fontSize: FontSize.xs, color: Palette.primary, fontWeight: FontWeight.bold },
+
+  torresGrid: { flexDirection: 'row', gap: Spacing.sm },
+  torreMini: { flex: 1, backgroundColor: Palette.surface, borderRadius: Radius.md, borderWidth: 1, borderColor: Palette.border, padding: Spacing.md, alignItems: 'center' },
+  torreMiniName: { fontSize: FontSize.sm, color: Palette.textMuted, marginBottom: 4, fontWeight: FontWeight.medium },
+  torreMiniCount: { fontSize: FontSize.xxl, fontWeight: FontWeight.heavy, color: Palette.primary, lineHeight: 34, marginBottom: 2 },
+  torreMiniCountZero: { color: Palette.danger },
+  torreMiniSub: { fontSize: FontSize.xs, color: Palette.textFaint },
+
   btnAction: {
-    borderRadius: 14,
-    paddingVertical: 15,
-    paddingHorizontal: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.sm,
+    minHeight: A11y.minHit, borderRadius: Radius.md, paddingVertical: 15, paddingHorizontal: Spacing.lg, marginBottom: Spacing.sm,
   },
-  btnDisabled: {
-    opacity: 0.5,
-  },
-  btnDestravar: {
-    backgroundColor: C.teal,
-  },
-  btnDestravLabel: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0A1628',
-  },
-  btnDevolver: {
-    backgroundColor: C.orangeBg,
-    borderWidth: 0.5,
-    borderColor: C.orangeBorder,
-  },
-  btnDevolverDisabled: {
-    backgroundColor: 'rgba(100,116,139,0.08)',
-    borderWidth: 0.5,
-    borderColor: 'rgba(100,116,139,0.15)',
-  },
-  btnDevolverLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: C.orange,
-  },
-  btnAtualizar: {
-    backgroundColor: C.blueBg,
-    borderWidth: 0.5,
-    borderColor: C.blueBorder,
-    paddingVertical: 12,
-  },
-  btnAtualizarLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: C.blue,
-  },
-  towerSelectBox: {
-    backgroundColor: 'rgba(13,31,60,0.8)',
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 0.5,
-    borderColor: C.tealBorder,
-    marginBottom: 10,
-  },
-  towerSelectTitle: {
-    fontSize: 12,
-    color: C.muted,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 10,
-  },
-  btnTorre: {
-    backgroundColor: C.tealBg,
-    borderWidth: 0.5,
-    borderColor: C.tealBorder,
-    paddingVertical: 13,
-  },
-  btnTorreLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: C.teal,
-  },
-  btnCancelar: {
-    backgroundColor: 'rgba(100,116,139,0.1)',
-    borderWidth: 0.5,
-    borderColor: 'rgba(100,116,139,0.2)',
-    paddingVertical: 11,
-    marginBottom: 0,
-  },
-  btnCancelarLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: C.muted,
-  },
+  btnDisabled: { opacity: 0.5 },
+  btnDestravar: { backgroundColor: Palette.primary, ...Shadow },
+  btnDestravLabel: { fontSize: FontSize.md, fontWeight: FontWeight.heavy, color: Palette.onPrimary },
+  btnDevolver: { backgroundColor: Palette.warningSoft, borderWidth: 1, borderColor: Palette.warningBorder },
+  btnDevolverDisabled: { backgroundColor: 'rgba(148,163,184,0.08)', borderWidth: 1, borderColor: Palette.border },
+  btnDevolverLabel: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Palette.warning },
+  btnAtualizar: { backgroundColor: Palette.infoSoft, borderWidth: 1, borderColor: Palette.infoBorder, paddingVertical: 13 },
+  btnAtualizarLabel: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Palette.info },
+
+  towerSelectBox: { backgroundColor: Palette.bgElevated, borderRadius: Radius.md, padding: Spacing.md, borderWidth: 1, borderColor: Palette.primaryBorder, marginBottom: Spacing.sm },
+  towerSelectTitle: { fontSize: FontSize.sm, color: Palette.textMuted, fontWeight: FontWeight.bold, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: Spacing.sm },
+  btnTorre: { backgroundColor: Palette.primarySoft, borderWidth: 1, borderColor: Palette.primaryBorder },
+  btnTorreLabel: { fontSize: FontSize.md, fontWeight: FontWeight.bold, color: Palette.primary },
+  btnCancelar: { backgroundColor: 'rgba(148,163,184,0.1)', borderWidth: 1, borderColor: Palette.border, marginBottom: 0 },
+  btnCancelarLabel: { fontSize: FontSize.sm, fontWeight: FontWeight.bold, color: Palette.textMuted },
 });
 
 export default HomeScreen;

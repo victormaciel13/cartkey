@@ -6,6 +6,7 @@ import HomeScreen     from './screens/HomeScreen';
 import AdminNavigator from './screens/admin/AdminNavigator';
 import { User }       from './service/api';
 import SplashScreen   from './SplashScreen';
+import { Palette }     from '../constants/theme';
 
 export default function Index() {
   const [user, setUser]             = useState<User | null>(null);
@@ -27,7 +28,7 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#001a33" />
+      <StatusBar barStyle="light-content" backgroundColor={Palette.bg} />
 
       {!user && (
         <LoginScreen onLogin={setUser} />
@@ -50,6 +51,6 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#001a33',
+    backgroundColor: Palette.bg,
   },
 });
