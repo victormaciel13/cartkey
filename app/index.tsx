@@ -1,4 +1,5 @@
 // app/index.tsx
+//ajustadinho
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 import LoginScreen    from './screens/LoginScreen';
