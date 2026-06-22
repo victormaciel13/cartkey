@@ -28,7 +28,7 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
   async function loadStatus(towerId = currentTowerId) {
     try {
       setLoadingStatus(true);
-      const data = await getStatus(user.apartment, towerId);
+      const data = await getStatus(towerId);
       setStatus(data);
     } catch (err) {
       console.error(err);
@@ -50,7 +50,7 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
   async function handleUnlockWithTower(towerId: TowerId) {
     try {
       setLoadingAction(true);
-      const updated = await unlockCart(user.apartment, towerId);
+      const updated = await unlockCart(towerId);
       setCurrentTowerId(towerId);
       setStatus(updated);
       if (updated.myCart && updated.myCart.towerId === towerId) {
@@ -72,7 +72,7 @@ const HomeScreen: React.FC<Props> = ({ user, onLogout }) => {
   async function handleReturnCart() {
     try {
       setLoadingAction(true);
-      const updated = await returnCart(user.apartment, currentTowerId);
+      const updated = await returnCart(currentTowerId);
       setStatus(updated);
       Alert.alert('Devolvido!', 'Carrinho devolvido com sucesso.');
     } catch (err) {
