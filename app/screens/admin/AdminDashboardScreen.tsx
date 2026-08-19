@@ -12,30 +12,30 @@ type Props = {
 };
 
 const STATS = [
-  { label: 'Moradores',      value: '48', icon: 'account-group',    color: Palette.info },
-  { label: 'Carrinhos',      value: '6',  icon: 'cart-outline',     color: Palette.success },
-  { label: 'Em uso',         value: '2',  icon: 'cart-check',       color: Palette.warning },
+  { label: 'Moradores', value: '48', icon: 'account-group', color: Palette.info },
+  { label: 'Carrinhos', value: '6', icon: 'cart-outline', color: Palette.success },
+  { label: 'Em uso', value: '2', icon: 'cart-check', color: Palette.warning },
   { label: 'Faces cadastr.', value: '31', icon: 'face-recognition', color: Palette.purple },
 ] as const;
 
 const RECENT_LOGS = [
-  { name: 'Ana Beatriz',  apt: '101', tower: 'Torre Mar',   time: '14:32', ok: true  },
-  { name: 'Carlos Souza', apt: '202', tower: 'Torre Serra', time: '13:15', ok: true  },
-  { name: 'Desconhecido', apt: '—',   tower: 'Torre Mar',   time: '12:48', ok: false },
-  { name: 'Pedro Alves',  apt: '404', tower: 'Torre Mar',   time: '11:20', ok: true  },
+  { name: 'Ana Beatriz', apt: '101', tower: 'Torre Mar', time: '14:32', ok: true },
+  { name: 'Carlos Souza', apt: '202', tower: 'Torre Serra', time: '13:15', ok: true },
+  { name: 'Desconhecido', apt: '—', tower: 'Torre Mar', time: '12:48', ok: false },
+  { name: 'Pedro Alves', apt: '404', tower: 'Torre Mar', time: '11:20', ok: true },
 ];
 
 const MENU_ITEMS: { id: AdminScreen; label: string; icon: string; color: string; roles: AdminRole[] }[] = [
-  { id: 'moradores',      label: 'Moradores',             icon: 'account-group',    color: Palette.info,    roles: ['admin', 'portaria'] },
-  { id: 'carrinhos',      label: 'Carrinhos',             icon: 'cart-outline',     color: Palette.success, roles: ['admin', 'portaria'] },
-  { id: 'historico',      label: 'Histórico',             icon: 'history',          color: Palette.warning, roles: ['admin', 'portaria'] },
-  { id: 'reconhecimento', label: 'Reconhecimento Facial', icon: 'face-recognition', color: Palette.purple,  roles: ['admin', 'portaria'] },
-  { id: 'configuracoes',  label: 'Configurações',         icon: 'cog',              color: Palette.danger,  roles: ['admin'] },
+  { id: 'moradores', label: 'Moradores', icon: 'account-group', color: Palette.info, roles: ['admin'] },
+  { id: 'carrinhos', label: 'Carrinhos', icon: 'cart-outline', color: Palette.success, roles: ['admin'] },
+  { id: 'historico', label: 'Histórico', icon: 'history', color: Palette.warning, roles: ['admin'] },
+  { id: 'reconhecimento', label: 'Reconhecimento Facial', icon: 'face-recognition', color: Palette.purple, roles: ['admin'] },
+  { id: 'configuracoes', label: 'Configurações', icon: 'cog', color: Palette.danger, roles: ['admin'] },
 ];
 
 export default function AdminDashboardScreen({ role, onNavigate, onLogout }: Props) {
   const visibleMenu = MENU_ITEMS.filter((m) => m.roles.includes(role));
-  const roleLabel = role === 'admin' ? 'Administrador' : 'Portaria';
+  const roleLabel = 'Administrador';
 
   return (
     <View style={styles.root}>
@@ -45,7 +45,7 @@ export default function AdminDashboardScreen({ role, onNavigate, onLogout }: Pro
         <View>
           <Text style={styles.headerTitle}>CartKey Gerencial</Text>
           <View style={styles.roleBadge}>
-            <MaterialCommunityIcons name={role === 'admin' ? 'shield-account' : 'security'} size={14} color={Palette.primary} />
+            <MaterialCommunityIcons name="shield-account" size={14} color={Palette.primary} />
             <Text style={styles.roleText}>{roleLabel}</Text>
           </View>
         </View>

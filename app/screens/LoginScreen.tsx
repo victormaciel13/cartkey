@@ -96,18 +96,6 @@ const LoginScreen: React.FC<Props> = ({ onLogin, onGoToSignup }) => {
         <TouchableOpacity style={styles.linkBtn} onPress={onGoToSignup} accessibilityRole="button">
           <Text style={styles.linkText}>Nao tem conta? <Text style={styles.linkAccent}>Cadastre-se</Text></Text>
         </TouchableOpacity>
-
-        <View style={styles.hintBox}>
-          <Text style={styles.hintTitle}>Acesso gerencial</Text>
-          <View style={styles.hintRow}>
-            <MaterialCommunityIcons name="shield-account" size={18} color={Palette.primary} />
-            <Text style={styles.hintText}>Admin: apto <Text style={styles.hintCode}>000</Text></Text>
-          </View>
-          <View style={styles.hintRow}>
-            <MaterialCommunityIcons name="bell-ring" size={18} color={Palette.info} />
-            <Text style={styles.hintText}>Portaria: apto <Text style={styles.hintCode}>999</Text></Text>
-          </View>
-        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -128,11 +116,6 @@ const styles = StyleSheet.create({
   linkBtn: { alignItems: 'center', paddingVertical: Spacing.md, marginTop: Spacing.xs },
   linkText: { color: Palette.textMuted, fontSize: FontSize.md },
   linkAccent: { color: Palette.primary, fontWeight: FontWeight.bold },
-  hintBox: { marginTop: Spacing.lg, backgroundColor: Palette.surface, borderRadius: Radius.md, padding: Spacing.lg, borderWidth: 1, borderColor: Palette.border, gap: Spacing.sm },
-  hintTitle: { color: Palette.textMuted, fontSize: FontSize.xs, fontWeight: FontWeight.bold, letterSpacing: 1, textTransform: 'uppercase', marginBottom: Spacing.xs, textAlign: 'center' },
-  hintRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, justifyContent: 'center' },
-  hintText: { color: Palette.textMuted, fontSize: FontSize.sm },
-  hintCode: { color: Palette.primary, fontWeight: FontWeight.heavy, fontSize: FontSize.md },
 });
 
 export default LoginScreen;

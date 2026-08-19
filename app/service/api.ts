@@ -3,11 +3,11 @@ import { supabase } from './supabase';
 import { TOWERS, TowerId } from '../../constants/towers';
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────
-export type Role = 'morador' | 'portaria' | 'admin';
+export type Role = 'morador' | 'admin';
 
 export type User = {
   id: string;
-  apartment: string;        // '101' (morador) | '000' (admin) | '999' (portaria)
+  apartment: string;        // '101' (morador) | '000' (admin)
   towerId: TowerId | null;
   role: Role;
   fullName?: string | null;
@@ -29,7 +29,6 @@ export type StatusResponse = {
 // ─── E-mail sintetico (a chave: torre + apto -> e-mail interno) ───────────────
 function buildAuthEmail(towerId: TowerId | null, apartment: string): string {
   if (apartment === '000') return 'admin@cartkey.app';
-  if (apartment === '999') return 'portaria@cartkey.app';
   return `${apartment}.${(towerId ?? 'MAR').toLowerCase()}@cartkey.app`;
 }
 
@@ -126,8 +125,6 @@ async function loadUser(uid: string): Promise<User> {
   const apartment =
     profile.role === 'admin'
       ? '000'
-      : profile.role === 'portaria'
-      ? '999'
       : String(profile.apartment_number ?? '');
 
   return {

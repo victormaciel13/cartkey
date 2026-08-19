@@ -1,17 +1,17 @@
 // app/screens/admin/AdminNavigator.tsx
 //
 // Navegador central do módulo gerencial.
-// Substitui o HomeScreen quando o usuário logado for portaria (ap. 999) ou admin (ap. 000).
+// Substitui o HomeScreen quando o usuário logado for admin (ap. 000).
 // Todos os imports de telas gerenciais ficam aqui — o resto do app não precisa saber deles.
 
 import React, { useState } from 'react';
-import AdminDashboardScreen   from './AdminDashboardScreen';
-import MoradoresScreen        from './MoradoresScreen';
-import CarrinhosScreen        from './CarrinhosScreen';
-import HistoricoScreen        from './Historicoscreen';
-import ReconhecimentoScreen   from './Reconhecimentoscreen';
-import Cadastrofacialscreen   from './Cadastrofacialscreen';
-import ConfiguracoesScreen    from './Configuracoesscreen';
+import AdminDashboardScreen from './AdminDashboardScreen';
+import MoradoresScreen from './MoradoresScreen';
+import CarrinhosScreen from './CarrinhosScreen';
+import HistoricoScreen from './Historicoscreen';
+import ReconhecimentoScreen from './Reconhecimentoscreen';
+import Cadastrofacialscreen from './Cadastrofacialscreen';
+import ConfiguracoesScreen from './Configuracoesscreen';
 
 export type AdminScreen =
   | 'dashboard'
@@ -22,7 +22,7 @@ export type AdminScreen =
   | 'cadastro-facial'
   | 'configuracoes';
 
-export type AdminRole = 'admin' | 'portaria';
+export type AdminRole = 'admin';
 
 type Props = {
   role: AdminRole;
@@ -33,7 +33,7 @@ export default function AdminNavigator({ role, onLogout }: Props) {
   const [screen, setScreen] = useState<AdminScreen>('dashboard');
 
   const navigate = (s: AdminScreen) => setScreen(s);
-  const goBack   = () => setScreen('dashboard');
+  const goBack = () => setScreen('dashboard');
 
   switch (screen) {
     case 'dashboard':
